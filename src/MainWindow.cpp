@@ -1,10 +1,10 @@
 // Author: Apostolos Chalis 2026 <achalis@csd.auth.gr>
 
+#include "ui_MainWindow.h"
 #include "MainWindow.hpp"
 #include "ui_MainWindow.h"
+
 #include <QListView>
-#include "MainWindow.hpp"
-#include "ui_MainWindow.h"
 #include <QListView>
 #include <QDebug>
 
@@ -37,7 +37,7 @@ MainWindow::~MainWindow() {
 void MainWindow::on_university_selection(const QModelIndex &index) {
 	if (showing_universities) {
 		QString selectedUni = university_model->data(index, Qt::DisplayRole).toString();
-		qDebug() << "Επιλέχθηκε:" << selectedUni;
+		qDebug() << "Selected: " << selectedUni;
 
 		QStringList departments;
 
@@ -64,7 +64,7 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
 			showing_universities = true;
 		} else {
 			QString selectedDept = department_model->data(index, Qt::DisplayRole).toString();
-			qDebug() << "Ξεκινάει η εγκατάσταση για το τμήμα:" << selectedDept;
+			qDebug() << "Installing for department: " << selectedDept;
 		}
 	}
 }
