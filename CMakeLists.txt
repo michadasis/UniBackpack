@@ -12,6 +12,8 @@ set(CMAKE_AUTOMOC ON) # Handles Signals/Slots
 set(CMAKE_AUTORCC ON) # Handles .qrc resource files
 set(CMAKE_AUTOUIC ON) # Handles .ui files
 
+set(CMAKE_AUTOUIC_SEARCH_PATHS ui)
+
 add_executable(UniBackpack
     src/main.cpp
     src/Downloader.cpp
