@@ -31,4 +31,4 @@ class MainWindow : public QMainWindow
 		bool showing_universities;
 };
 
-#endif // MAINWINDOW_HPP
+#endif
