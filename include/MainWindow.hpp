@@ -1,5 +1,4 @@
-// Author: Apostolos Chalis 2026 <achalis@csd.auth.gr>
-// Co-Author: Ioannis Michadasis
+// Authors: Apostolos Chalis 2026 <achalis@csd.auth.gr>, Ioannis Michadasis 2026 <cs05415@uowm.gr>
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
