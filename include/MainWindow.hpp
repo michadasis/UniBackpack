@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow
 		QStandardItemModel *department_model;
 
 		bool showing_universities;
+		QString current_university;
 };
 
 #endif // MAINWINDOW_HPP
