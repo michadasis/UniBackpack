@@ -18,9 +18,9 @@ MainWindow::MainWindow(QWidget *parent)
 	department_model = new QStandardItemModel(this);
 
 	QList<QPair<QString, QString>> universities = {
-    	{"Aristotle University of Thessaloniki", ":/auth_logo.png"},
-    	{"University of Western Macedonia",      ":/uowm_logo.png"},
-    	{"University of Macedonia",              ":/uom_logo.png"}
+    	{"Aristotle University of Thessaloniki", ":/icons/auth_logo.png"},
+    	{"University of Western Macedonia",      ":/icons/uowm_logo.png"},
+    	{"University of Macedonia",              ":/icons/uom_logo.png"}
 	};
 
 	for (const auto &[name, iconPath] : universities) {

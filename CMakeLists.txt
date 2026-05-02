@@ -12,6 +12,7 @@ set(CMAKE_AUTORCC ON) # Handles .qrc resource files
 set(CMAKE_AUTOUIC ON) # Handles .ui files
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ui)
+set(RESOURCE_FILES resources/icons/resources.qrc)
 
 add_executable(UniBackpack
     src/main.cpp
@@ -19,7 +20,7 @@ add_executable(UniBackpack
     src/MainWindow.cpp
     include/MainWindow.hpp
     ui/MainWindow.ui
-    resources/resources.qrc
+    resources/icons/resources.qrc
 )
 
 target_include_directories(UniBackpack PRIVATE include)
