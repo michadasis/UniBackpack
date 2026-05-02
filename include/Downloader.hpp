@@ -27,4 +27,4 @@ class Downloader : public QObject {
 		void download_completed(bool success);
 };
 
-#endif // DOWNLOADER_HPP
+#endif
