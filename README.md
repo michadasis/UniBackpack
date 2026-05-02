@@ -28,10 +28,8 @@ sudo pacman -S base-devel cmake qt6-base qt6-tools polkit
 
 ## Contributors
 
-**Apostolos Chalis - Author:**
-
+**Apostolos Chalis - Author**
 Email: achalis@csd.auth.gr / cs05414@uowm.gr
 
-**Ioannis Michadasis - Co-Author:**
-
+**Ioannis Michadasis - Co-Author**
 Email: cs05415@uowm.gr
