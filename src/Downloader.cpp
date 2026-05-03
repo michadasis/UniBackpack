@@ -37,6 +37,22 @@ bool Downloader::is_in_pacman_repo(const QString &package_name) {
     }
 }
 
+bool Downloader::is_in_apt_repo(const QString &package_name) {
+    QProcess process;
+    
+    process.start("apt-cache", QStringList() << "show" << package_name);
+    process.waitForFinished();
+
+    if (process.exitCode() == 0) {
+	    qDebug() << "Package" << package_name << "is available in apt repositories.";
+        return true;
+    } else {
+	    qDebug() << "Package" << package_name << "is NOT available in apt repositories.";
+        return false;
+    }
+}
+
+
 QStringList Downloader::read_package_list(bool standard_package_manager, QString package_manager) {
 	QStringList installable_with_standard_package_manager; 
 	QStringList installable_with_non_standard_package_manager;
@@ -94,7 +110,59 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
 		return installable_with_non_standard_package_manager; 
 	}
 
-	// TODO: Write the same about apt 
+	if (standard_package_manager && package_manager == "apt") {
+		QString filepath_of_list = ":/lists/" + name_of_university + "/" + name_of_department + "/apt_list.txt";
+
+		qDebug() << "Reading package list from: " << filepath_of_list;
+		
+		QFile file(filepath_of_list);
+
+		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            		qDebug() << "Critical Error: Could not open the file!" << file.errorString();
+			return installable_with_standard_package_manager;
+        	}
+
+		QTextStream in(&file);
+
+    		while (!in.atEnd()) {
+        		QString package = in.readLine().trimmed();
+        
+        		if (!package.isEmpty() && is_in_apt_repo(package)) {
+				qDebug() << "Adding package to installable list: " << package;
+            			installable_with_standard_package_manager.append(package);
+        		}
+    		}
+		file.close(); 
+		return installable_with_standard_package_manager;
+	}
+
+	if (!standard_package_manager && package_manager == "apt") {
+		QString filepath_of_list = ":/lists/" + name_of_university + "/" + name_of_department + "/apt_list.txt";
+
+		qDebug() << "Reading package list from: " << filepath_of_list;
+		
+		QFile file(filepath_of_list);
+
+		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            		qDebug() << "Critical Error: Could not open the file!" << file.errorString();
+			return installable_with_non_standard_package_manager;
+        	}
+
+		QTextStream in(&file);
+
+    		while (!in.atEnd()) {
+        		QString package = in.readLine().trimmed();
+        
+        		if (!package.isEmpty() && is_in_apt_repo(package)) {
+				qDebug() << "Adding package to installable list: " << package;
+            			installable_with_non_standard_package_manager.append(package);
+        		}
+    		}
+		file.close(); 
+		return installable_with_non_standard_package_manager; 
+	}
+
+
 }
 
 void Downloader::download_via_pacman(const QStringList &list_to_be_downloaded) {
