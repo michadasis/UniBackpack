@@ -13,7 +13,6 @@ class Downloader : public QObject {
 	private:
 		QString name_of_university;
 		QString name_of_department;
-		QString current_university; // this should not be like that (refactor after 1.0)
 
 	public:
 		explicit Downloader(const QString &university, const QString &department, QObject *parent = nullptr)
