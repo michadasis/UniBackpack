@@ -21,7 +21,7 @@ sudo pacman -S base-devel cmake qt6-base qt6-tools polkit
 
 **For Debian / Ubuntu / Linux Mint:**
 ```bash
-sudo apt install build-essential cmake qt6-base-dev qt6-tools-dev-tools policykit-1
+sudo apt install build-essential cmake qt6-base-dev qt6-tools-dev qt6-tools-dev-tools policykit-1
 ```
 
 ## Project Structure

@@ -4,7 +4,7 @@ project(UniBackpack VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network LinguistTools)
 
 set(CMAKE_AUTOMOC ON) # Handles Signals/Slots
 set(CMAKE_AUTORCC ON) # Handles .qrc resource files
@@ -36,6 +36,15 @@ target_link_libraries(UniBackpack PRIVATE
         Qt6::Gui
         Qt6::Widgets
         Qt6::Network
+)
+
+# --- Internationalization (i18n) ---
+# Compiles .ts -> .qm and embeds them under ":/i18n/" automatically.
+# Run "cmake --build build --target update_translations" to populate .ts from tr() strings.
+qt_add_translations(UniBackpack
+        TS_FILES
+        translations/unibackpack_en.ts
+        translations/unibackpack_el.ts
 )
 
 install(TARGETS UniBackpack DESTINATION bin)

@@ -28,11 +28,15 @@ bool Downloader::is_in_pacman_repo(const QString &package_name) {
     process.start("pacman", QStringList() << "-Si" << package_name);
     process.waitForFinished();
     if (process.exitCode() == 0) {
-        emit status_message("Found: " + package_name);
+        QString msg = tr("Found: %1").arg(package_name);
+        emit status_message(msg);
+        emit status_update(msg);
         QCoreApplication::processEvents();
         return true;
     } else {
-        emit status_message("Not in repos: " + package_name);
+        QString msg = tr("Not in repos: %1").arg(package_name);
+        emit status_message(msg);
+        emit status_update(msg);
         QCoreApplication::processEvents();
         return false;
     }
@@ -46,11 +50,15 @@ bool Downloader::is_in_apt_repo(const QString &package_name) {
     QString stdout_output = process.readAllStandardOutput();
     
     if (process.exitCode() == 0 && stdout_output.contains("Package:")) {
-        emit status_message("Found: " + package_name);
+        QString msg = tr("Found: %1").arg(package_name);
+        emit status_message(msg);
+        emit status_update(msg);
         QCoreApplication::processEvents();
         return true;
     } else {
-        emit status_message("Not in repos: " + package_name);
+        QString msg = tr("Not in repos: %1").arg(package_name);
+        emit status_message(msg);
+        emit status_update(msg);
         QCoreApplication::processEvents();
         return false;
     }
@@ -62,7 +70,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
 
     if (standard_package_manager && package_manager == "pacman") {
         QString filepath_of_list = ":/lists/" + name_of_university + "/" + name_of_department + "/pacman_list.txt";
-        emit status_message("Checking packages for " + name_of_department + "...");
+        QString msg = tr("Checking packages for %1...").arg(name_of_department);
+        emit status_message(msg);
+        emit status_update(msg);
         QFile file(filepath_of_list);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qDebug() << "Critical Error: Could not open the file!" << file.errorString();
@@ -72,7 +82,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
         while (!in.atEnd()) {
             QString package = in.readLine().trimmed();
             if (!package.isEmpty() && is_in_pacman_repo(package)) {
-                emit status_message("Adding: " + package);
+                QString addMsg = tr("Adding: %1").arg(package);
+                emit status_message(addMsg);
+                emit status_update(addMsg);
                 installable_with_standard_package_manager.append(package);
             }
         }
@@ -82,7 +94,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
 
     if (!standard_package_manager && package_manager == "pacman") {
         QString filepath_of_list = ":/lists/" + name_of_university + "/" + name_of_department + "/pacman_list.txt";
-        emit status_message("Checking packages for " + name_of_department + "...");
+        QString msg = tr("Checking packages for %1...").arg(name_of_department);
+        emit status_message(msg);
+        emit status_update(msg);
         QFile file(filepath_of_list);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qDebug() << "Critical Error: Could not open the file!" << file.errorString();
@@ -92,7 +106,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
         while (!in.atEnd()) {
             QString package = in.readLine().trimmed();
             if (!package.isEmpty() && !is_in_pacman_repo(package)) {
-                emit status_message("Adding (non-standard): " + package);
+                QString addMsg = tr("Adding (non-standard): %1").arg(package);
+                emit status_message(addMsg);
+                emit status_update(addMsg);
                 installable_with_non_standard_package_manager.append(package);
             }
         }
@@ -102,7 +118,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
 
     if (standard_package_manager && package_manager == "apt") {
         QString filepath_of_list = ":/lists/" + name_of_university + "/" + name_of_department + "/apt_list.txt";
-        emit status_message("Checking packages for " + name_of_department + "...");
+        QString msg = tr("Checking packages for %1...").arg(name_of_department);
+        emit status_message(msg);
+        emit status_update(msg);
         QFile file(filepath_of_list);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qDebug() << "Critical Error: Could not open the file!" << file.errorString();
@@ -112,7 +130,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
         while (!in.atEnd()) {
             QString package = in.readLine().trimmed();
             if (!package.isEmpty() && is_in_apt_repo(package)) {
-                emit status_message("Adding: " + package);
+                QString addMsg = tr("Adding: %1").arg(package);
+                emit status_message(addMsg);
+                emit status_update(addMsg);
                 installable_with_standard_package_manager.append(package);
             }
         }
@@ -122,7 +142,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
 
     if (!standard_package_manager && package_manager == "apt") {
         QString filepath_of_list = ":/lists/" + name_of_university + "/" + name_of_department + "/apt_list.txt";
-        emit status_message("Checking packages for " + name_of_department + "...");        
+        QString msg = tr("Checking packages for %1...").arg(name_of_department);
+emit status_message(msg);
+emit status_update(msg);        
         QFile file(filepath_of_list);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qDebug() << "Critical Error: Could not open the file!" << file.errorString();
@@ -132,7 +154,9 @@ QStringList Downloader::read_package_list(bool standard_package_manager, QString
         while (!in.atEnd()) {
             QString package = in.readLine().trimmed();
             if (!package.isEmpty() && !is_in_apt_repo(package)) {
-                emit status_message("Adding (non-standard): " + package);
+                QString addMsg = tr("Adding (non-standard): %1").arg(package);
+                emit status_message(addMsg);
+                emit status_update(addMsg);;
                 installable_with_non_standard_package_manager.append(package);
             }
         }
@@ -148,9 +172,8 @@ void Downloader::download_via_pacman(const QStringList &list_to_be_downloaded) {
     // there is a problem with pacman -Syu though, so the user should be alerted about that
     QMessageBox::warning(
         nullptr,
-        "Warning",
-        "It is advised to update your system before proceeding."
-        "\nRun sudo pacman -Syu"
+        tr("Warning"),
+        tr("It is advised to update your system before proceeding.\nRun sudo pacman -Syu")
     );
 
     if (list_to_be_downloaded.isEmpty()) {

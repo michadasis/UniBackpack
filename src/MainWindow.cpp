@@ -1,18 +1,39 @@
 // Author: Apostolos Chalis 2026 <achalis@csd.auth.gr>
 // Co-Author: Ioannis Michadasis
-
 #include "ui_MainWindow.h"
 #include "MainWindow.hpp"
 #include "Downloader.hpp"
 
+#include <QCoreApplication>
+#include <QSettings>
+#include <QComboBox>
 #include <QDebug>
 #include <QStandardItemModel>
 #include <QIcon>
 #include <QTextEdit>
 
+void applyTranslator(const QString &locale) {
+    static QTranslator elTranslator;
+    static bool installed = false;
+
+    if (installed) {
+        QCoreApplication::removeTranslator(&elTranslator);
+        installed = false;
+    }
+
+    if (locale.startsWith("el")) {
+        if (elTranslator.isEmpty()) // if no translation is found, the original English text is shown
+            elTranslator.load(":/i18n/unibackpack_el.qm");
+        if (!elTranslator.isEmpty()) {
+            QCoreApplication::installTranslator(&elTranslator);
+            installed = true;
+        }
+    }
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-    
+
     ui->setupUi(this);
 
     university_model = new QStandardItemModel(this);
@@ -24,8 +45,9 @@ MainWindow::MainWindow(QWidget *parent)
         {"University of Macedonia",              ":/icons/uom_logo.png"}
     };
 
-    for (const auto &[name, iconPath] : universities) {
-        QStandardItem *item = new QStandardItem(QIcon(iconPath), name);
+    for (const auto &[key, iconPath] : universities) {
+        QStandardItem *item = new QStandardItem(QIcon(iconPath), key);
+        item->setData(key, Qt::UserRole);
         university_model->appendRow(item);
     }
 
@@ -39,6 +61,33 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->listView, &QListView::clicked, this, &MainWindow::on_university_selection);
     connect(ui->showMoreButton, &QPushButton::clicked, this, &MainWindow::toggle_output);
+
+    // Language selector in status bar
+    QComboBox *langCombo = new QComboBox(this);
+    langCombo->addItem("English", "en_US");
+    langCombo->addItem("Ελληνικά", "el_GR");
+
+    QSettings settings;
+    QString currentLang = settings.value("language", "en_US").toString();
+    int idx = langCombo->findData(currentLang);
+    if (idx >= 0) {
+        langCombo->blockSignals(true);
+        langCombo->setCurrentIndex(idx);
+        langCombo->blockSignals(false);
+    }
+
+    statusBar()->addPermanentWidget(langCombo);
+
+    connect(langCombo, &QComboBox::currentIndexChanged, this, [=](int index) {
+        QString lang = langCombo->itemData(index).toString();
+        QSettings s;
+        s.setValue("language", lang);
+        applyTranslator(lang);
+        QEvent ev(QEvent::LanguageChange);
+        QCoreApplication::sendEvent(this, &ev);
+    });
+
+    retranslate();
 }
 
 MainWindow::~MainWindow() {
@@ -53,10 +102,9 @@ void MainWindow::toggle_output() {
 
 void MainWindow::on_university_selection(const QModelIndex &index) {
     if (showing_universities) {
-        current_university = university_model->data(index, Qt::DisplayRole).toString();
-        
+        current_university = university_model->data(index, Qt::UserRole).toString();
+
         QStringList departments;
-        departments << "Back to Universities";
 
         if (current_university == "Aristotle University of Thessaloniki") {
             departments << "Informatics" << "Physics";
@@ -67,17 +115,24 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
         }
 
         department_model->clear();
-        for (const QString &dept : departments) {
-            department_model->appendRow(new QStandardItem(dept));
-        }
         
+        QStandardItem *backItem = new QStandardItem(tr("Back to Universities"));
+        backItem->setData("__back__", Qt::UserRole);
+        department_model->appendRow(backItem);
+
+        for (const QString &dept : departments) {
+            QStandardItem *item = new QStandardItem(tr(dept.toUtf8().constData()));
+            item->setData(dept, Qt::UserRole);
+            department_model->appendRow(item);
+        }
+
         ui->listView->setModel(department_model);
         showing_universities = false;
 
     } else {
-        QString selectedDept = department_model->data(index, Qt::DisplayRole).toString();
-        
-        if (selectedDept == "Back to Universities") {
+        QString selectedDept = department_model->data(index, Qt::UserRole).toString();
+
+        if (selectedDept == "__back__") {
             ui->listView->setModel(university_model);
             showing_universities = true;
             return;
@@ -98,16 +153,8 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
             ui->statusLabel->setVisible(true);
             ui->showMoreButton->setVisible(true);
 
-            // Connect signals
             connect(downloader, &Downloader::status_message, this, [=](const QString &msg) {
                 ui->outputView->append(msg);
-
-                if (msg.startsWith("Found:") || msg.startsWith("Adding:") ||
-                    msg.startsWith("Checking") || msg.startsWith("Not found:") ||
-                    msg.startsWith("Adding (non-standard):")) {
-                    ui->statusLabel->setText(msg.trimmed());
-                }
-
                 for (const QString &line : msg.split('\n')) {
                     if (line.startsWith("dlstatus:") || line.startsWith("pmstatus:")) {
                         QStringList parts = line.split(':');
@@ -123,11 +170,14 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
                 }
             });
 
+            connect(downloader, &Downloader::status_update, this, [=](const QString &msg) {
+                ui->statusLabel->setText(msg.trimmed());
+            });
+
             connect(downloader, &Downloader::download_completed, this, [=](bool success) {
                 ui->listView->setEnabled(true);
                 ui->progressBar->setMaximum(100);
                 ui->progressBar->setValue(100);
-
                 if (success) {
                     ui->statusLabel->setText("✓ Finished!");
                     ui->progressBar->setFormat("Done!");
@@ -145,10 +195,8 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
                 ui->progressBar->setValue(percent);
             });
 
-            // Read packages
             QStringList packages_to_download = downloader->read_package_list(true, package_manager);
 
-            // Start download
             if (package_manager == "pacman") {
                 downloader->download_via_pacman(packages_to_download);
             } else if (package_manager == "apt") {
@@ -159,4 +207,36 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
             ui->statusLabel->setVisible(true);
         }
     }
+}
+
+void MainWindow::retranslate() {
+    for (int i = 0; i < university_model->rowCount(); ++i) {
+        QStandardItem *item = university_model->item(i);
+        QString key = item->data(Qt::UserRole).toString();
+        QString translated = tr(key.toUtf8().constData());
+        item->setText(translated.isEmpty() ? key : translated);
+    }
+
+    if (!showing_universities) {
+        for (int i = 0; i < department_model->rowCount(); ++i) {
+            QStandardItem *item = department_model->item(i);
+            QString key = item->data(Qt::UserRole).toString();
+            if (key == "__back__") {
+                item->setText(tr("Back to Universities"));
+            } else {
+                QString translated = tr(key.toUtf8().constData());
+                item->setText(translated.isEmpty() ? key : translated);
+            }
+        }
+    }
+
+    ui->showMoreButton->setText(output_visible ? tr("Hide details ▲") : tr("Show details ▼"));
+}
+
+void MainWindow::changeEvent(QEvent *event) {
+    if (event->type() == QEvent::LanguageChange) {
+        ui->retranslateUi(this);
+        retranslate();
+    }
+    QMainWindow::changeEvent(event);
 }

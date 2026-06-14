@@ -29,6 +29,7 @@ class Downloader : public QObject {
 	signals:
 		void progress_updated(int percentage);
 		void status_message(const QString &message);
+		void status_update(const QString &message);
 		void download_completed(bool success);
 };
 

@@ -6,6 +6,9 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QModelIndex>
+#include <QTranslator>
+
+void applyTranslator(const QString &locale);
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,6 +21,10 @@ class MainWindow : public QMainWindow
 	public:
     		MainWindow(QWidget *parent = nullptr);
 		~MainWindow(); 
+		void retranslate();
+
+	protected:
+		void changeEvent(QEvent *event) override;
 	
 	private slots: 
 		void on_university_selection(const QModelIndex &index);
