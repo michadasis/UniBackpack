@@ -1,4 +1,4 @@
-unibackpack (1.1.0-1) noble; urgency=low
+unibackpack (1.1.1) noble; urgency=low
 
   * Add bilingual support (English/Greek) with live language switching
 
