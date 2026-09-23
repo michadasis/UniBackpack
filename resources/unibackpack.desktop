@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=UniBackpack
+GenericName=Software Toolchain Installer
+Comment=Automate software toolchain installation for university students
+Exec=unibackpack
+Icon=unibackpack
+Terminal=false
+StartupNotify=true
+Categories=Development;Education;System;
