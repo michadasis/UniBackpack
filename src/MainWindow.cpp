@@ -11,6 +11,10 @@
 #include <QStandardItemModel>
 #include <QIcon>
 #include <QTextEdit>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 void applyTranslator(const QString &locale) {
     static QTranslator elTranslator;
@@ -39,17 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     university_model = new QStandardItemModel(this);
     department_model = new QStandardItemModel(this);
 
-    QList<QPair<QString, QString>> universities = {
-        {"Aristotle University of Thessaloniki", ":/icons/auth_logo.png"},
-        {"University of Western Macedonia",      ":/icons/uowm_logo.png"},
-        {"University of Macedonia",              ":/icons/uom_logo.png"}
-    };
-
-    for (const auto &[key, iconPath] : universities) {
-        QStandardItem *item = new QStandardItem(QIcon(iconPath), key);
-        item->setData(key, Qt::UserRole);
-        university_model->appendRow(item);
-    }
+    load_universities(":/universities.json");
 
     ui->listView->setModel(university_model);
     showing_universities = true;
@@ -94,6 +88,37 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+void MainWindow::load_universities(const QString &path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Could not open" << path;
+        return;
+    }
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
+    if (error.error != QJsonParseError::NoError || !doc.isArray()) {
+        qWarning() << "Invalid universities JSON:" << error.errorString();
+        return;
+    }
+
+    for (const QJsonValue &value : doc.array()) {
+        QJsonObject uni = value.toObject();
+        QString key = uni["name"].toString();
+        if (key.isEmpty())
+            continue;
+
+        QStringList departments;
+        for (const QJsonValue &dept : uni["departments"].toArray())
+            departments << dept.toString();
+        departments_by_university.insert(key, departments);
+
+        QStandardItem *item = new QStandardItem(QIcon(uni["icon"].toString()), key);
+        item->setData(key, Qt::UserRole);
+        university_model->appendRow(item);
+    }
+}
+
 void MainWindow::toggle_output() {
     output_visible = !output_visible;
     ui->outputView->setVisible(output_visible);
@@ -104,15 +129,7 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
     if (showing_universities) {
         current_university = university_model->data(index, Qt::UserRole).toString();
 
-        QStringList departments;
-
-        if (current_university == "Aristotle University of Thessaloniki") {
-            departments << "Informatics" << "Physics";
-        } else if (current_university == "University of Western Macedonia") {
-            departments << "Informatics" << "Mechanical Engineering";
-        } else if (current_university == "University of Macedonia") {
-            departments << "Applied Informatics" << "Economics";
-        }
+        const QStringList departments = departments_by_university.value(current_university);
 
         department_model->clear();
         
