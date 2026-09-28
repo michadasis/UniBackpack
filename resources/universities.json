@@ -1,0 +1,17 @@
+[
+    {
+        "name": "Aristotle University of Thessaloniki",
+        "icon": ":/icons/auth_logo.png",
+        "departments": ["Informatics", "Physics"]
+    },
+    {
+        "name": "University of Western Macedonia",
+        "icon": ":/icons/uowm_logo.png",
+        "departments": ["Informatics", "Mechanical Engineering"]
+    },
+    {
+        "name": "University of Macedonia",
+        "icon": ":/icons/uom_logo.png",
+        "departments": ["Applied Informatics", "Economics"]
+    }
+]

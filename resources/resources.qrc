@@ -8,6 +8,9 @@
     <file>icons/uom_logo.png</file>
     <file>icons/unibackpack.png</file>
 
+    <!-- Data -->
+    <file>universities.json</file>
+
     <!-- Lists -->
     <file>lists/University of Western Macedonia/Informatics/pacman_list.txt</file>
     <file>lists/University of Western Macedonia/Informatics/apt_list.txt</file>
