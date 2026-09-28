@@ -18,11 +18,13 @@ qt_add_executable(unibackpack
         src/Downloader.cpp
         src/MainWindow.cpp
         src/utils/applyTranslator.cpp
+        src/utils/loadUniversities.cpp
 
         # Header files
         include/MainWindow.hpp
         include/Downloader.hpp
-        #include/utils/applyTranslator.hpp
+        include/utils/applyTranslator.hpp
+        include/utils/loadUniversities.hpp
 
         # UI
         ui/MainWindow.ui
