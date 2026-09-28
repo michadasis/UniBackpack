@@ -32,27 +32,14 @@ build() {
 package() {
   DESTDIR="$pkgdir" cmake --install build
 
-  install -d "$pkgdir/usr/share/applications"
-  install -d "$pkgdir/usr/share/pixmaps"
+  install -Dm644 "$srcdir/$_pkgname/resources/unibackpack.desktop" \
+    "$pkgdir/usr/share/applications/unibackpack.desktop"
 
   if [ -f "$srcdir/$_pkgname/resources/icons/unibackpack.png" ]; then
-    install -Dm644 "$srcdir/$_pkgname/resources/icons/unibackpack.png" "$pkgdir/usr/share/pixmaps/unibackpack.png"
-    ICON="unibackpack"
+    install -Dm644 "$srcdir/$_pkgname/resources/icons/unibackpack.png" \
+      "$pkgdir/usr/share/pixmaps/unibackpack.png"
   else
-    ICON="system-software-install"
+    sed -i 's/^Icon=.*/Icon=system-software-install/' \
+      "$pkgdir/usr/share/applications/unibackpack.desktop"
   fi
-
-  cat <<EOF > "$pkgdir/usr/share/applications/unibackpack.desktop"
-[Desktop Entry]
-Type=Application
-Version=1.0
-Name=UniBackpack
-GenericName=Software Toolchain Installer
-Comment=Automate software toolchain installation for university students
-Exec=unibackpack
-Icon=$ICON
-Terminal=false
-StartupNotify=true
-Categories=Development;Education;System;
-EOF
 }
