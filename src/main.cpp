@@ -1,6 +1,8 @@
 // Author: Apostolos Chalis 2026 <achalis@csd.auth.gr>
-#include <QApplication>
 #include "MainWindow.hpp"
+#include "utils/applyTranslator.hpp"
+
+#include <QApplication>
 #include <QTranslator>
 #include <QSettings>
 #include <QLocale>
@@ -16,7 +18,7 @@ int main(int argc, char *argv[]){
 	// Load saved language, default to system locale, fall back to English
 	QSettings settings;
     QString lang = settings.value("language", QLocale::system().name()).toString();
-	applyTranslator(lang);
+	Utils::applyTranslator(lang);
 
 
 	MainWindow main_window;

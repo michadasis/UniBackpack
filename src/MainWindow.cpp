@@ -3,6 +3,7 @@
 #include "ui_MainWindow.h"
 #include "MainWindow.hpp"
 #include "Downloader.hpp"
+#include "utils/applyTranslator.hpp"
 
 #include <QCoreApplication>
 #include <QSettings>
@@ -15,25 +16,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-
-void applyTranslator(const QString &locale) {
-    static QTranslator elTranslator;
-    static bool installed = false;
-
-    if (installed) {
-        QCoreApplication::removeTranslator(&elTranslator);
-        installed = false;
-    }
-
-    if (locale.startsWith("el")) {
-        if (elTranslator.isEmpty()) // if no translation is found, the original English text is shown
-            elTranslator.load(":/i18n/unibackpack_el.qm");
-        if (!elTranslator.isEmpty()) {
-            QCoreApplication::installTranslator(&elTranslator);
-            installed = true;
-        }
-    }
-}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -76,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
         QString lang = langCombo->itemData(index).toString();
         QSettings s;
         s.setValue("language", lang);
-        applyTranslator(lang);
+        Utils::applyTranslator(lang);
         QEvent ev(QEvent::LanguageChange);
         QCoreApplication::sendEvent(this, &ev);
     });
@@ -132,7 +114,7 @@ void MainWindow::on_university_selection(const QModelIndex &index) {
         const QStringList departments = departments_by_university.value(current_university);
 
         department_model->clear();
-        
+
         QStandardItem *backItem = new QStandardItem(tr("Back to Universities"));
         backItem->setData("__back__", Qt::UserRole);
         department_model->appendRow(backItem);
