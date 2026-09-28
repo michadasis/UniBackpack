@@ -3,11 +3,13 @@
 #include <QString>
 #include <QJsonDocument>
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonValue>
 #include <QJsonObject>
+#include <QStandardItem>
 
 namespace Utils {
-    void loadUniversities(const QString &path) {
+    void loadUniversities(const QString &path, QHash<QString, QStringList> &departments_by_university, QStandardItemModel *university_model) {
         QFile file(path);
         if (!file.open(QIODevice::ReadOnly)) {
             qWarning() << "Could not open" << path;

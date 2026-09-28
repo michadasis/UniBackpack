@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     university_model = new QStandardItemModel(this);
     department_model = new QStandardItemModel(this);
 
-    Utils::loadUniversities(":/universities.json");
+    Utils::loadUniversities(":/universities.json",departments_by_university ,university_model);
 
     ui->listView->setModel(university_model);
     showing_universities = true;
