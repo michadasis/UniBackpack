@@ -4,6 +4,7 @@
 #include "MainWindow.hpp"
 #include "Downloader.hpp"
 #include "utils/applyTranslator.hpp"
+#include "utils/loadUniversities.hpp"
 
 #include <QCoreApplication>
 #include <QSettings>
@@ -25,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     university_model = new QStandardItemModel(this);
     department_model = new QStandardItemModel(this);
 
-    load_universities(":/universities.json");
+    Utils::loadUniversities(":/universities.json");
 
     ui->listView->setModel(university_model);
     showing_universities = true;
@@ -70,36 +71,7 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::load_universities(const QString &path) {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Could not open" << path;
-        return;
-    }
 
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
-    if (error.error != QJsonParseError::NoError || !doc.isArray()) {
-        qWarning() << "Invalid universities JSON:" << error.errorString();
-        return;
-    }
-
-    for (const QJsonValue &value : doc.array()) {
-        QJsonObject uni = value.toObject();
-        QString key = uni["name"].toString();
-        if (key.isEmpty())
-            continue;
-
-        QStringList departments;
-        for (const QJsonValue &dept : uni["departments"].toArray())
-            departments << dept.toString();
-        departments_by_university.insert(key, departments);
-
-        QStandardItem *item = new QStandardItem(QIcon(uni["icon"].toString()), key);
-        item->setData(key, Qt::UserRole);
-        university_model->appendRow(item);
-    }
-}
 
 void MainWindow::toggle_output() {
     output_visible = !output_visible;

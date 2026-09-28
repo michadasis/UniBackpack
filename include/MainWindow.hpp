@@ -35,7 +35,6 @@ class MainWindow : public QMainWindow
 	private:
     		Ui::MainWindow *ui;
 
-		void load_universities(const QString &path);
 		QHash<QString, QStringList> departments_by_university;
 
 		QStandardItemModel *university_model;
